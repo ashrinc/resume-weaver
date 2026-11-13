@@ -1,0 +1,48 @@
+\documentclass[11pt]{article}
+\usepackage[margin=0.7in]{geometry}
+\usepackage{enumitem}
+\usepackage[hidelinks]{hyperref}
+\setlist[itemize]{noitemsep, topsep=2pt}
+\pagestyle{empty}
+
+\begin{document}
+
+\begin{center}
+  {\LARGE \textbf{Dana Whitfield}}\\
+  Denver, CO \textbar{} dana.whitfield@example.com \textbar{} github.com/dwhitfield
+\end{center}
+
+\section*{Summary}
+Senior backend engineer with 7 years designing and operating high-throughput payment services in Go and Python on AWS.
+
+\section*{Experience}
+\subsection*{Senior Backend Engineer, Northstar Pay \hfill Jan 2021 -- Present}
+\begin{itemize}
+  \item Designed, built and operated high-throughput payment services in Go and Python processing 3M+ transactions per day.
+  \item Owned the reliability of the PostgreSQL and Redis data layer, leading schema design and query optimization that cut p99 latency by 40\%.
+  \item Built event-driven settlement workflows on Kafka and exposed them through well-documented REST and gRPC APIs.
+  \item Partnered with product and compliance teams to ship PCI DSS compliant card-vaulting features.
+  \item Mentored 5 engineers through code reviews, design docs and pair programming.
+  \item Designed and operated money-movement services handling payouts for 4,000+ businesses.
+\end{itemize}
+
+\subsection*{Backend Engineer, Copperline Bank \hfill Jun 2017 -- Dec 2020}
+\begin{itemize}
+  \item Ran microservices on AWS (ECS, RDS, SQS) with Docker and Terraform, reducing deploy time by 60\%.
+  \item Built distributed systems for ledger reconciliation with clear API design and versioning.
+  \item Collaborated with product, risk and compliance partners to deliver dependable payment systems on tight timelines.
+  \item Deployed services to Kubernetes with Helm and added Datadog and Prometheus observability.
+\end{itemize}
+
+\section*{Education}
+\subsection*{B.S. in Computer Science, University of Colorado \hfill Aug 2013 -- May 2017}
+
+\section*{Skills}
+\begin{itemize}
+  \item \textbf{Languages:} Go, Python, SQL
+  \item \textbf{Data:} PostgreSQL, Redis, Kafka
+  \item \textbf{Cloud:} AWS (ECS, RDS, SQS), Docker, Terraform, Kubernetes, Helm
+  \item \textbf{Practices:} Distributed systems, microservices, API design, backend development, observability
+\end{itemize}
+
+\end{document}

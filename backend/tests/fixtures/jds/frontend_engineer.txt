@@ -1,0 +1,28 @@
+Frontend Engineer (React)
+Brightpath Learning · Remote (US)
+
+We're looking for a frontend engineer to help millions of students learn on our web platform. You'll join a cross-functional squad of designers, PMs and engineers.
+
+Responsibilities:
+* Build accessible, responsive user interfaces with React and TypeScript
+* Turn Figma designs into reusable components in our Storybook design system
+* Improve Core Web Vitals and overall web performance across our Next.js app
+* Write unit and end-to-end tests with Jest, React Testing Library and Playwright
+* Collaborate closely with designers and backend engineers on GraphQL API contracts
+
+Qualifications:
+* 3+ years building production web applications
+* Expert knowledge of JavaScript, TypeScript, HTML and CSS
+* Hands-on experience with React and modern state management (Redux or Zustand)
+* Experience with accessibility standards (WCAG 2.1) and responsive design
+* Comfortable with Git, code review and CI/CD workflows
+* Strong attention to detail and clear communication
+
+Bonus points:
+* Experience with Tailwind CSS or styled-components
+* Exposure to React Native
+* Interest in education technology
+
+What we offer
+* Fully remote team, flexible hours
+* Home office stipend

@@ -1,0 +1,29 @@
+Backend Engineer (Python) — Mid-Level
+Meridian Freight · Hybrid (Chicago, IL) or Remote (US)
+
+Meridian Freight builds the software that books, tracks and bills truckload shipments for 3,000 carriers. We're hiring a mid-level backend engineer to join the Platform team.
+
+What You'll Do
+- Design, build and maintain RESTful APIs in Python using FastAPI
+- Own background processing for quoting and invoicing with Celery and Redis
+- Model data and write performant queries in PostgreSQL
+- Ship services to AWS using Docker and our CI/CD pipelines in GitHub Actions
+- Write automated tests with pytest and take part in code reviews
+- Join a shared on-call rotation and help improve observability
+
+Requirements
+- 3+ years of professional experience building backend services in Python
+- Experience with a modern Python web framework (FastAPI, Flask or Django)
+- Strong SQL and PostgreSQL skills
+- Experience with Docker and deploying to AWS
+- Familiarity with asynchronous task queues such as Celery
+- Clear written communication and a collaborative mindset
+
+Nice to Have
+- Kubernetes experience
+- Experience with Terraform
+- Background in logistics or supply chain software
+
+Benefits
+- Competitive salary, 401(k) match and health coverage
+- Learning budget and home-office stipend

@@ -1,0 +1,32 @@
+Senior Backend Engineer — Payments Platform
+
+Ledgerly is building the financial infrastructure for mid-market companies. Our platform moves billions of dollars a year, and our engineering team is small, senior and remote-first.
+
+About the Role
+You will design and operate the services that move money for thousands of businesses. You'll work closely with product, risk and compliance to ship reliable systems quickly.
+
+What You'll Do
+- Design, build and operate high-throughput payment services in Go and Python
+- Own the reliability of our PostgreSQL and Redis data layer, including schema design and query optimization
+- Build event-driven workflows on Kafka and expose them through well-documented REST and gRPC APIs
+- Partner with product and compliance teams to ship features that meet PCI DSS requirements
+- Mentor engineers through code reviews, design docs and pairing
+
+Requirements
+- 5+ years of professional backend development experience
+- Strong proficiency in Go or Python
+- Deep experience with PostgreSQL, including indexing and query tuning
+- Experience running services on AWS (ECS, RDS, SQS) with Docker and Terraform
+- Solid understanding of distributed systems, microservices and API design
+- Excellent written communication skills and a strong sense of ownership
+
+Nice to Have
+- Experience with Kubernetes and Helm
+- Familiarity with observability tooling such as Datadog or Prometheus
+- Background in payments, banking or fintech
+- AWS Certified Solutions Architect or similar certification is a plus
+
+Benefits
+- Competitive salary and equity
+- Remote-first with quarterly team offsites in Denver
+- $2,000 annual learning budget for courses, books and Kubernetes conferences

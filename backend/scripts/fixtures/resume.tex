@@ -1,0 +1,132 @@
+%-------------------------
+% Resume in LaTeX — Jake's Resume style (fictional candidate for testing)
+% License : MIT
+%-------------------------
+
+\documentclass[letterpaper,11pt]{article}
+
+\usepackage{latexsym}
+\usepackage[empty]{fullpage}
+\usepackage{titlesec}
+\usepackage[usenames,dvipsnames]{color}
+\usepackage{enumitem}
+\usepackage[hidelinks]{hyperref}
+\usepackage{fancyhdr}
+\usepackage[english]{babel}
+\usepackage{tabularx}
+\input{glyphtounicode}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyfoot{}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+
+\addtolength{\oddsidemargin}{-0.5in}
+\addtolength{\evensidemargin}{-0.5in}
+\addtolength{\textwidth}{1in}
+\addtolength{\topmargin}{-.5in}
+\addtolength{\textheight}{1.0in}
+
+\urlstyle{same}
+\raggedbottom
+\raggedright
+\setlength{\tabcolsep}{0in}
+
+\titleformat{\section}{
+  \vspace{-4pt}\scshape\raggedright\large
+}{}{0em}{}[\color{black}\titlerule \vspace{-5pt}]
+
+\pdfgentounicode=1
+
+\newcommand{\resumeItem}[1]{
+  \item\small{
+    {#1 \vspace{-2pt}}
+  }
+}
+
+\newcommand{\resumeSubheading}[4]{
+  \vspace{-2pt}\item
+    \begin{tabular*}{0.97\textwidth}[t]{l@{\extracolsep{\fill}}r}
+      \textbf{#1} & #2 \\
+      \textit{\small#3} & \textit{\small #4} \\
+    \end{tabular*}\vspace{-7pt}
+}
+
+\newcommand{\resumeProjectHeading}[2]{
+    \item
+    \begin{tabular*}{0.97\textwidth}{l@{\extracolsep{\fill}}r}
+      \small#1 & #2 \\
+    \end{tabular*}\vspace{-7pt}
+}
+
+\renewcommand\labelitemii{$\vcenter{\hbox{\tiny$\bullet$}}$}
+
+\newcommand{\resumeSubHeadingListStart}{\begin{itemize}[leftmargin=0.15in, label={}]}
+\newcommand{\resumeSubHeadingListEnd}{\end{itemize}}
+\newcommand{\resumeItemListStart}{\begin{itemize}}
+\newcommand{\resumeItemListEnd}{\end{itemize}\vspace{-5pt}}
+
+\begin{document}
+
+%----------HEADING----------
+\begin{center}
+    \textbf{\Huge \scshape Alex Morgan} \\ \vspace{1pt}
+    \small 555-0134 $|$ \href{mailto:alex.morgan@example.com}{\underline{alex.morgan@example.com}} $|$
+    \href{https://github.com/amorgan-dev}{\underline{github.com/amorgan-dev}}
+\end{center}
+
+%-----------EDUCATION-----------
+\section{Education}
+  \resumeSubHeadingListStart
+    \resumeSubheading
+      {University of Michigan}{Ann Arbor, MI}
+      {Bachelor of Science in Computer Science}{Sep. 2016 -- May 2020}
+  \resumeSubHeadingListEnd
+
+%-----------EXPERIENCE-----------
+\section{Experience}
+  \resumeSubHeadingListStart
+
+    \resumeSubheading
+      {Software Engineer}{Aug. 2022 -- Present}
+      {Harborview Health}{Remote}
+      \resumeItemListStart
+        \resumeItem{Built and maintained patient-scheduling APIs in \textbf{Python} and \textbf{Flask}, serving 40K daily requests}
+        \resumeItem{Moved background report generation off the request path using a Redis-backed job queue, cutting p95 latency by 35\%}
+        \resumeItem{Wrote \textbf{PostgreSQL} migrations and tuned slow queries with indexes and EXPLAIN plans}
+        \resumeItem{Added pytest suites and GitHub Actions checks, raising test coverage from 52\% to 84\%}
+      \resumeItemListEnd
+
+    \resumeSubheading
+      {Junior Software Engineer}{Jul. 2020 -- Jul. 2022}
+      {Lakeshore Logistics}{Chicago, IL}
+      \resumeItemListStart
+        \resumeItem{Developed internal tools in \textbf{Django} for tracking 2,000+ daily shipments}
+        \resumeItem{Containerized three legacy services with \textbf{Docker} and deployed them to AWS ECS}
+        \resumeItem{Participated in on-call rotation and wrote runbooks for common incidents}
+      \resumeItemListEnd
+
+  \resumeSubHeadingListEnd
+
+%-----------PROJECTS-----------
+\section{Projects}
+    \resumeSubHeadingListStart
+      \resumeProjectHeading
+          {\textbf{Ledgerlite} $|$ \emph{Python, Flask, SQLite}}{2021}
+          \resumeItemListStart
+            \resumeItem{Personal budgeting web app with CSV import and monthly spending reports}
+          \resumeItemListEnd
+    \resumeSubHeadingListEnd
+
+%-----------SKILLS-----------
+\section{Technical Skills}
+ \begin{itemize}[leftmargin=0.15in, label={}]
+    \small{\item{
+     \textbf{Languages}{: Python, SQL, JavaScript, Bash} \\
+     \textbf{Frameworks}{: Flask, Django, React} \\
+     \textbf{Tools}{: PostgreSQL, Redis, Docker, Git, GitHub Actions, AWS (ECS, S3)}
+    }}
+ \end{itemize}
+
+\end{document}

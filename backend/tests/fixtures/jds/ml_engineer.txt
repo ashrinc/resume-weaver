@@ -1,0 +1,22 @@
+MACHINE LEARNING ENGINEER, RECOMMENDATIONS
+
+Streamwave is a music streaming service with 40 million monthly listeners. The Personalization team builds the models behind our home feed, radio and daily mixes.
+
+RESPONSIBILITIES
+1. Train, evaluate and deploy recommendation models using PyTorch and TensorFlow
+2. Build feature pipelines in PySpark and Airflow on top of our Databricks lakehouse
+3. Run A/B tests and analyze results with product analysts
+4. Ship models to production with MLflow and Kubernetes, and monitor them for drift
+5. Communicate findings to stakeholders across product and engineering
+
+MINIMUM QUALIFICATIONS
+1. MS or PhD in Computer Science, Statistics or a related field, or equivalent experience
+2. 4-7 years of experience in applied machine learning
+3. Strong Python and SQL skills; experience with pandas, NumPy and scikit-learn
+4. Solid foundation in statistics, deep learning and recommendation systems
+
+PREFERRED QUALIFICATIONS
+1. Experience with large language models, embeddings or retrieval-augmented generation (RAG)
+2. Familiarity with feature stores and real-time inference on AWS SageMaker
+3. Publications at RecSys, KDD or NeurIPS
+4. Google Cloud Professional Machine Learning Engineer certification

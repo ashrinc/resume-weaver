@@ -1,0 +1,537 @@
+/* Score band colours (spec values for the analysis panel). */
+.panel {
+  --score-good: #00ff88;
+  --score-ok: #f0c040;
+  --score-bad: #ff4444;
+
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  animation: enter 0.45s ease-out both;
+}
+
+@keyframes enter {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.panelTitle {
+  font-size: 0.95rem;
+  color: var(--accent);
+  text-transform: lowercase;
+  letter-spacing: 0.04em;
+}
+
+.panelTitle::before {
+  content: "// ";
+  color: var(--muted);
+}
+
+/* Colour helpers used by numbers and bar fills. */
+.good {
+  color: var(--score-good);
+  background-color: var(--score-good);
+}
+.ok {
+  color: var(--score-ok);
+  background-color: var(--score-ok);
+}
+.bad {
+  color: var(--score-bad);
+  background-color: var(--score-bad);
+}
+
+.scoreValue .good,
+.scoreValue .ok,
+.scoreValue .bad {
+  background-color: transparent;
+}
+
+/* ---------- 1. Score overview ---------- */
+.scoreGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+@media (max-width: 560px) {
+  .scoreGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.scoreCard {
+  background: rgba(5, 12, 8, 0.75);
+  border: 1px solid var(--accent-dim);
+  border-radius: var(--radius);
+  padding: 0.9rem 1rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.scoreTitle {
+  font-size: 0.85rem;
+  color: var(--text);
+}
+
+.scoreSubtitle {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+.scoreValue {
+  margin: 0.25rem 0 0.15rem;
+  font-family: var(--font-code);
+  font-size: 2.75rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.scoreValue > span:first-child {
+  text-shadow: 0 0 18px currentColor;
+}
+
+.scoreMax {
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--muted);
+  margin-left: 0.2rem;
+}
+
+.beforeAfter {
+  margin: 0.35rem 0 0;
+  font-family: var(--font-code);
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+.deltaUp {
+  color: var(--score-good);
+}
+
+.deltaDown {
+  color: var(--score-bad);
+}
+
+/* ---------- Bars ---------- */
+.bar,
+.barMini,
+.barMiniEmpty {
+  width: 100%;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.07);
+  overflow: hidden;
+}
+
+.bar {
+  height: 6px;
+}
+
+.barMini,
+.barMiniEmpty {
+  height: 4px;
+}
+
+.barFill {
+  height: 100%;
+  border-radius: inherit;
+  transform-origin: left center;
+  animation: grow 0.8s ease-out both;
+  box-shadow: 0 0 8px currentColor;
+}
+
+@keyframes grow {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* ---------- 2. Reasoning ---------- */
+.reasoning {
+  border: 1px solid var(--accent-dim);
+  border-radius: var(--radius);
+  padding: 0.6rem 0.9rem;
+  background: rgba(5, 12, 8, 0.5);
+}
+
+.reasoning summary {
+  cursor: pointer;
+  font-family: var(--font-code);
+  font-size: 0.8rem;
+  color: var(--accent);
+}
+
+.reasoning p {
+  margin: 0.6rem 0 0.2rem;
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+.changes {
+  margin: 0.6rem 0 0.2rem;
+  padding-left: 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+/* ---------- Shared block headings ---------- */
+.block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+
+.blockTitle {
+  font-size: 0.82rem;
+  color: var(--text);
+  padding-bottom: 0.35rem;
+  border-bottom: 1px solid var(--accent-dim);
+}
+
+/* ---------- 3. Keyword chips ---------- */
+.chipGroups {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem 1.25rem;
+}
+
+@media (max-width: 560px) {
+  .chipGroups {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.chipGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  min-width: 0;
+}
+
+.chipGroupTitle {
+  font-family: var(--font-code);
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--muted);
+  margin: 0;
+}
+
+.chipCount {
+  color: var(--text);
+}
+
+.chipList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.chipEmpty {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--muted);
+  font-style: italic;
+}
+
+.matchedMandatory {
+  background: rgba(0, 255, 136, 0.12);
+  border-color: rgba(0, 255, 136, 0.55);
+  color: #c9ffe6;
+  box-shadow: 0 0 6px rgba(0, 255, 136, 0.15);
+}
+
+.matchedPreferred {
+  background: var(--accent-dim);
+  border-color: rgba(0, 255, 136, 0.22);
+  color: #a3c2b2;
+}
+
+.missingHigh {
+  background: rgba(255, 68, 68, 0.1);
+  border-color: rgba(255, 68, 68, 0.6);
+  color: #ffb8b8;
+  box-shadow: 0 0 6px rgba(255, 68, 68, 0.15);
+}
+
+.missingPreferred {
+  background: rgba(240, 192, 64, 0.1);
+  border-color: rgba(240, 192, 64, 0.5);
+  color: #f5dc9a;
+}
+
+.fuzzyMark {
+  color: var(--score-ok);
+  font-weight: 700;
+}
+
+/* ---------- 4. Criteria breakdown ---------- */
+.criteria {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+  gap: 0.75rem;
+}
+
+.criterion,
+.criterionNa {
+  background: rgba(5, 12, 8, 0.6);
+  border: 1px solid var(--accent-dim);
+  border-radius: var(--radius);
+  padding: 0.65rem 0.8rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.criterionNa {
+  opacity: 0.6;
+}
+
+.criterionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.75rem;
+}
+
+.criterionName {
+  font-size: 0.82rem;
+}
+
+.criterionPoints {
+  font-family: var(--font-code);
+  font-size: 0.85rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.criterionMax {
+  color: var(--muted);
+  font-weight: 400;
+}
+
+.criterionDetails {
+  margin: 0;
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+
+/* ---------- 5. Suggestions ---------- */
+.suggestions {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.suggestions li {
+  display: flex;
+  gap: 0.65rem;
+  align-items: flex-start;
+  padding: 0.55rem 0.75rem;
+  border-radius: var(--radius);
+  background: rgba(5, 12, 8, 0.5);
+  border: 1px solid transparent;
+  font-size: 0.88rem;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.suggestions li:hover {
+  border-color: var(--accent-dim);
+  background: rgba(26, 58, 42, 0.35);
+}
+
+.suggestionIcon {
+  color: var(--accent);
+  font-family: var(--font-code);
+  flex-shrink: 0;
+}
+
+/* ---------- 6. Warnings ---------- */
+.warnings {
+  border: 1px solid rgba(240, 192, 64, 0.6);
+  border-radius: var(--radius);
+  background: rgba(240, 192, 64, 0.06);
+  box-shadow: 0 0 8px rgba(240, 192, 64, 0.12);
+  padding: 0.75rem 1rem;
+}
+
+.warningsTitle {
+  font-size: 0.82rem;
+  color: var(--score-ok);
+}
+
+.warnings ul {
+  margin: 0.5rem 0 0;
+  padding-left: 1.1rem;
+  font-size: 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .panel,
+  .barFill {
+    animation: none;
+  }
+}
+
+/* ---------- M11.2: provider/model line ---------- */
+.modelInfo {
+  margin: 0.5rem 0 0;
+  font-size: 0.75rem;
+  color: var(--text-muted, #8a9a90);
+}
+
+.modelInfo code {
+  font-family: var(--font-code);
+}
+
+/* ---------- M11.2: requirement matches ---------- */
+.requirementList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.requirement summary {
+  cursor: pointer;
+  display: flex;
+  align-items: baseline;
+  gap: 0.55rem;
+  font-size: 0.88rem;
+}
+
+.requirementKind {
+  font-family: var(--font-code);
+  font-size: 0.7rem;
+  color: var(--text-muted, #8a9a90);
+  white-space: nowrap;
+}
+
+.requirementText {
+  line-height: 1.4;
+}
+
+.requirementBody {
+  margin: 0.35rem 0 0.5rem 1.2rem;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+.requirementBody p {
+  margin: 0 0 0.3rem;
+}
+
+.evidence {
+  margin: 0;
+  padding: 0.3rem 0.6rem;
+  border-left: 2px solid var(--accent-dim);
+  font-style: italic;
+}
+
+.bulletIds {
+  font-style: normal;
+  font-family: var(--font-code);
+  font-size: 0.75rem;
+  color: var(--text-muted, #8a9a90);
+}
+
+.statusChip {
+  display: inline-block;
+  min-width: 4.6rem;
+  text-align: center;
+  padding: 0.05rem 0.45rem;
+  border-radius: 999px;
+  border: 1px solid currentColor;
+  font-family: var(--font-code);
+  font-size: 0.7rem;
+}
+
+.statusMatched {
+  color: var(--score-good);
+}
+
+.statusPartial {
+  color: var(--score-ok);
+}
+
+.statusMissing {
+  color: var(--score-bad);
+}
+
+/* ---------- M11.2: per-bullet changes ---------- */
+.bulletChanges {
+  list-style: none;
+  margin: 0.6rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  font-size: 0.88rem;
+}
+
+.bulletChanges li {
+  padding-left: 0.6rem;
+  border-left: 2px solid var(--accent-dim);
+}
+
+.change_reverted,
+.change_restored {
+  border-left-color: var(--score-ok) !important;
+}
+
+.changeHead,
+.changeReason,
+.changeDiff {
+  margin: 0 0 0.2rem !important;
+}
+
+.changeStatus {
+  font-family: var(--font-code);
+  font-size: 0.75rem;
+  color: var(--accent);
+}
+
+.changeReason {
+  color: var(--text-muted, #8a9a90);
+}
+
+.changeDiff {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.changeDiff del {
+  opacity: 0.6;
+}
+
+.changeDiff ins {
+  text-decoration: none;
+}

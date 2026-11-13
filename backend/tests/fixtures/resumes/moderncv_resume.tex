@@ -1,0 +1,43 @@
+\documentclass[11pt,a4paper,sans]{moderncv}
+\moderncvstyle{classic}
+\moderncvcolor{blue}
+\usepackage[utf8]{inputenc}
+\usepackage[scale=0.8]{geometry}
+
+\name{Marcus}{Okafor}
+\title{Data Engineer}
+\address{Chicago, IL}{}{}
+\phone[mobile]{+1~(312)~555~0199}
+\email{marcus.okafor@example.com}
+\social[github]{mokafor}
+
+\begin{document}
+\makecvtitle
+
+\section{Profile}
+\cvitem{}{Data engineer with 5 years of experience designing batch and streaming pipelines on AWS and Spark.}
+
+\section{Experience}
+\cventry{2021--Present}{Senior Data Engineer}{Northwind Analytics}{Chicago, IL}{}{%
+\begin{itemize}
+\item Migrated 40+ nightly ETL jobs from cron to Airflow, cutting failures by 70\%.
+\item Built a Spark Structured Streaming pipeline ingesting 1.5B events/day into Delta Lake.
+\end{itemize}}
+\cventry{2019--2021}{Data Engineer}{Blue Harbor Insurance}{Milwaukee, WI}{}{%
+\begin{itemize}
+\item Designed dimensional models in Snowflake used by 12 analytics teams.
+\end{itemize}}
+
+\section{Education}
+\cventry{2015--2019}{B.S. in Statistics}{University of Wisconsin--Madison}{Madison, WI}{GPA: 3.8/4.0}{}
+
+\section{Skills}
+\cvitem{Languages}{Python, SQL, Scala}
+\cvitem{Big Data}{Spark, Kafka, Airflow, dbt}
+\cvitem{Cloud}{AWS (S3, Glue, EMR), Snowflake}
+
+\section{Certifications}
+\cvlistitem{AWS Certified Data Analytics -- Specialty}
+\cvlistitem{Databricks Certified Data Engineer Associate}
+
+\end{document}
