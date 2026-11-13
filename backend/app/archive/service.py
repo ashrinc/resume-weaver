@@ -1,4 +1,8 @@
-"""Resume archive service (PRD FR-09): local PDF storage + SQLite metadata.
+"""Resume archive service (PRD FR-09): PDF storage + database metadata.
+
+Storage is pluggable (``storage.py``: local disk or a private Supabase
+bucket); the database is SQLite locally or Postgres when DATABASE_URL points
+at one. The ``file_path`` column holds only the object key (``<uuid>.pdf``).
 
 Fully independent of the tailoring feature: its own tables, engine and
 directory, and no imports from ``app.tailor``.
@@ -9,9 +13,10 @@ Upload rules
 * The file must have a ``.pdf`` extension AND an ``application/pdf`` MIME
   type, start with the ``%PDF-`` signature, be non-empty and be at most
   ``MAX_UPLOAD_BYTES`` (10 MB).
-* The upload is streamed to ``<uuid>.pdf.part``, checked chunk by chunk, then
-  renamed to ``<uuid>.pdf`` before the DB row is written. Any failure removes
-  the file, so rejected uploads leave nothing behind. The client's file name
+* The upload is validated chunk by chunk while the storage backend consumes
+  it (local: ``<uuid>.pdf.part`` renamed on success; Supabase: buffered, sent
+  only if valid), before the DB row is written. Any failure leaves nothing
+  behind. The client's file name
   is only stored as metadata (sanitised), never used as a path.
 """
 
@@ -20,7 +25,7 @@ from __future__ import annotations
 import logging
 import re
 import uuid
-from collections.abc import Callable
+from collections.abc import AsyncIterator, Callable
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -32,6 +37,8 @@ from sqlalchemy.ext.asyncio import AsyncEngine, async_sessionmaker, create_async
 from sqlalchemy.pool import NullPool
 
 from app.archive.models import ArchivedResume, ArchivedResumeOut, Base
+from app.archive.storage import LocalStorage, Storage, StorageNotFoundError
+from app.config import is_postgres_url, normalize_database_url
 
 __all__ = [
     "ALLOWED_MIME_TYPES",
@@ -78,41 +85,65 @@ def _utcnow() -> datetime:
     return datetime.now(UTC)
 
 
+def _engine_for(database_url: str) -> AsyncEngine:
+    if is_postgres_url(database_url):
+        # psycopg (async). prepare_threshold=None disables server-side prepared
+        # statements, which transaction-mode poolers (Supabase :6543) reject.
+        return create_async_engine(
+            database_url, pool_pre_ping=True, connect_args={"prepare_threshold": None}
+        )
+    # NullPool: SQLite connections are cheap, and pooled aiosqlite connections
+    # must not be reused across event loops (tests, reloads).
+    return create_async_engine(database_url, poolclass=NullPool)
+
+
 class ArchiveService:
     def __init__(
         self,
-        upload_dir: Path,
+        storage: Storage | Path,
         database_url: str,
         *,
         max_upload_bytes: int = MAX_UPLOAD_BYTES,
         clock: Callable[[], datetime] = _utcnow,
     ) -> None:
-        self.upload_dir = Path(upload_dir)
-        self.database_url = database_url
+        # A plain directory means local storage (keeps tests and old callers simple).
+        self.storage: Storage = (
+            LocalStorage(storage) if isinstance(storage, (str, Path)) else storage
+        )
+        self.database_url = normalize_database_url(database_url)
         self.max_upload_bytes = max_upload_bytes
         self._clock = clock
-        # NullPool: SQLite connections are cheap, and pooled aiosqlite
-        # connections must not be reused across event loops (tests, reloads).
-        self._engine: AsyncEngine = create_async_engine(database_url, poolclass=NullPool)
+        self._engine: AsyncEngine = _engine_for(self.database_url)
         self._sessions = async_sessionmaker(self._engine, expire_on_commit=False)
         self._ready = False
+
+    @property
+    def upload_dir(self) -> Path:
+        """Local storage root (local backend only)."""
+        if not isinstance(self.storage, LocalStorage):
+            raise AttributeError("upload_dir is only defined for local storage")
+        return self.storage.root
 
     # ------------------------------------------------------------ lifecycle
 
     async def init(self) -> None:
-        """Create the upload directory and tables. Idempotent."""
+        """Prepare storage and create tables. Idempotent."""
         if self._ready:
             return
-        await anyio.Path(self.upload_dir).mkdir(parents=True, exist_ok=True)
-        db_path = make_url(self.database_url).database
-        if db_path and db_path != ":memory:":
-            await anyio.Path(db_path).parent.mkdir(parents=True, exist_ok=True)
+        await self.storage.init()
+        if not is_postgres_url(self.database_url):
+            db_path = make_url(self.database_url).database
+            if db_path and db_path != ":memory:":
+                await anyio.Path(db_path).parent.mkdir(parents=True, exist_ok=True)
         async with self._engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
         self._ready = True
 
     async def close(self) -> None:
         await self._engine.dispose()
+        close = getattr(self.storage, "close", None)
+        if close is not None:
+            await close()
 
     # ------------------------------------------------------------ queries
 
@@ -132,20 +163,16 @@ class ArchiveService:
                 raise ArchiveNotFoundError(f"No archived resume with id {resume_id}.")
             return ArchivedResumeOut.model_validate(row)
 
-    def path_for(self, record: ArchivedResumeOut) -> Path:
-        """Absolute path of a record's file, guaranteed to be inside upload_dir."""
-        root = self.upload_dir.resolve()
-        path = (root / record.file_path).resolve()
-        if not path.is_relative_to(root):
-            raise ArchiveNotFoundError(f"The file for archived resume {record.id} is missing.")
-        return path
-
-    async def file_for(self, resume_id: int) -> tuple[Path, ArchivedResumeOut]:
+    async def open_file(self, resume_id: int) -> tuple[AsyncIterator[bytes], ArchivedResumeOut]:
+        """The record and a stream of its PDF. 404 if the row or object is missing."""
         record = await self.get(resume_id)
-        path = self.path_for(record)
-        if not await anyio.Path(path).is_file():
-            raise ArchiveNotFoundError(f"The file for archived resume {resume_id} is missing.")
-        return path, record
+        try:
+            stream = await self.storage.open(record.file_path)
+        except StorageNotFoundError:
+            raise ArchiveNotFoundError(
+                f"The file for archived resume {resume_id} is missing."
+            ) from None
+        return stream, record
 
     # ------------------------------------------------------------ commands
 
@@ -174,14 +201,13 @@ class ArchiveService:
                 "file", f"The file's type must be application/pdf (got {mime or 'none'})."
             )
 
-        stored_name = f"{uuid.uuid4().hex}.pdf"
-        final_path = self.upload_dir / stored_name
-        size = await self._store(upload, final_path)
+        key = f"{uuid.uuid4().hex}.pdf"  # object key; the only thing the DB stores
+        size = await self.storage.save(key, self._validated_chunks(upload))
 
         record = ArchivedResume(
             company_name=company,
             job_role=role,
-            file_path=stored_name,
+            file_path=key,
             original_filename=original,
             file_size_bytes=size,
             upload_timestamp=self._clock(),
@@ -192,7 +218,7 @@ class ArchiveService:
                 await session.commit()
                 await session.refresh(record)
         except BaseException:
-            await self._unlink(final_path)
+            await self.storage.delete(key)
             raise
         logger.info("archive: stored resume id=%d (%d bytes)", record.id, size)
         return ArchivedResumeOut.model_validate(record)
@@ -205,45 +231,31 @@ class ArchiveService:
             record = ArchivedResumeOut.model_validate(row)
             await session.delete(row)
             await session.commit()
-        # Remove the file after the row is gone: a failure here leaves an
-        # orphaned file (harmless) rather than a record pointing at nothing.
+        # Remove the object after the row is gone: a failure here leaves an
+        # orphaned object (harmless) rather than a record pointing at nothing.
         try:
-            await self._unlink(self.path_for(record))
-        except ArchiveNotFoundError:
-            pass
+            await self.storage.delete(record.file_path)
+        except Exception:
+            logger.warning("archive: could not delete the stored object for id=%d", resume_id)
         logger.info("archive: deleted resume id=%d", resume_id)
 
     # ------------------------------------------------------------ helpers
 
-    async def _store(self, upload: UploadFile, final_path: Path) -> int:
-        """Stream the upload to disk with size/signature checks; return bytes written."""
-        part_path = final_path.with_name(final_path.name + ".part")
+    async def _validated_chunks(self, upload: UploadFile) -> AsyncIterator[bytes]:
+        """Yield the upload in chunks, enforcing signature, size and non-emptiness.
+        Raising here makes the storage backend discard everything it received."""
         size = 0
-        try:
-            async with await anyio.open_file(part_path, "wb") as out:
-                while chunk := await upload.read(_CHUNK_BYTES):
-                    if size == 0 and not chunk.startswith(PDF_SIGNATURE):
-                        raise ArchiveValidationError(
-                            "file", "The file is not a valid PDF (it doesn't start with %PDF-)."
-                        )
-                    size += len(chunk)
-                    if size > self.max_upload_bytes:
-                        raise ArchiveValidationError(
-                            "file",
-                            f"The file is larger than {self.max_upload_bytes // (1024 * 1024)} MB.",
-                        )
-                    await out.write(chunk)
-            if size == 0:
-                raise ArchiveValidationError("file", "The file is empty.")
-            await anyio.Path(part_path).rename(final_path)
-        except BaseException:
-            await self._unlink(part_path)
-            raise
-        return size
-
-    @staticmethod
-    async def _unlink(path: Path) -> None:
-        try:
-            await anyio.Path(path).unlink(missing_ok=True)
-        except OSError:
-            logger.warning("archive: could not remove a file from disk")
+        while chunk := await upload.read(_CHUNK_BYTES):
+            if size == 0 and not chunk.startswith(PDF_SIGNATURE):
+                raise ArchiveValidationError(
+                    "file", "The file is not a valid PDF (it doesn't start with %PDF-)."
+                )
+            size += len(chunk)
+            if size > self.max_upload_bytes:
+                raise ArchiveValidationError(
+                    "file",
+                    f"The file is larger than {self.max_upload_bytes // (1024 * 1024)} MB.",
+                )
+            yield chunk
+        if size == 0:
+            raise ArchiveValidationError("file", "The file is empty.")

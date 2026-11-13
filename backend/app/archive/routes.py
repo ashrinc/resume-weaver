@@ -2,16 +2,17 @@
 
 POST   /api/archive                 multipart: file, company_name, job_role? -> 201
 GET    /api/archive                 metadata list, newest first
-GET    /api/archive/{id}/download   the PDF, with its original file name
+GET    /api/archive/{id}/download   the PDF, streamed through the backend (no public URLs)
 DELETE /api/archive/{id}            remove the row and the file -> 204
 """
 
 from __future__ import annotations
 
 from typing import Annotated
+from urllib.parse import quote
 
 from fastapi import APIRouter, Depends, File, Form, Request, Response, UploadFile
-from fastapi.responses import FileResponse
+from fastapi.responses import StreamingResponse
 
 from app.api.schemas import ErrorResponse
 from app.archive.models import ArchivedResumeOut
@@ -24,7 +25,7 @@ _NOT_FOUND = {404: {"model": ErrorResponse, "description": "No such resume, or f
 
 async def get_archive(request: Request) -> ArchiveService:
     service: ArchiveService = request.app.state.archive_service
-    await service.init()  # idempotent; creates tables and the upload directory
+    await service.init()  # idempotent; prepares storage and creates tables
     return service
 
 
@@ -56,16 +57,30 @@ async def list_resumes(archive: Archive) -> list[ArchivedResumeOut]:
     return await archive.list()
 
 
+def _content_disposition(filename: str) -> str:
+    """attachment; ASCII names quoted, others RFC 5987 (filename*=utf-8''...)."""
+    quoted = quote(filename)
+    if quoted != filename:
+        return f"attachment; filename*=utf-8''{quoted}"
+    return f'attachment; filename="{filename}"'
+
+
 @router.get(
     "/{resume_id}/download",
-    response_class=FileResponse,
+    response_class=StreamingResponse,
     responses={200: {"content": {"application/pdf": {}}}, **_NOT_FOUND},
 )
-async def download_resume(resume_id: int, archive: Archive) -> FileResponse:
-    path, record = await archive.file_for(resume_id)
-    # FileResponse sets Content-Disposition: attachment, with an RFC 5987
-    # filename*= fallback for non-ASCII names.
-    return FileResponse(path, media_type="application/pdf", filename=record.original_filename)
+async def download_resume(resume_id: int, archive: Archive) -> StreamingResponse:
+    # Existence is checked before streaming starts, so a missing object is a 404.
+    stream, record = await archive.open_file(resume_id)
+    return StreamingResponse(
+        stream,
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": _content_disposition(record.original_filename),
+            "Content-Length": str(record.file_size_bytes),
+        },
+    )
 
 
 @router.delete("/{resume_id}", status_code=204, responses=_NOT_FOUND)

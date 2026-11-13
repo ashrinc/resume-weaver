@@ -259,13 +259,13 @@ def test_deadline_returns_structured_retryable_error() -> None:
     assert slow.cancelled  # the run is cancelled, not left running
 
 
-def test_deadline_message_for_the_default_90_seconds() -> None:
+def test_deadline_message_for_the_default_240_seconds() -> None:
     from app.api.errors import TailorDeadlineError
     from app.config import Settings
 
-    assert Settings(_env_file=None).tailor_deadline_seconds == 90
-    assert str(TailorDeadlineError(90.0)) == (
-        "Tailoring took longer than 90 seconds and was stopped. Try again."
+    assert Settings(_env_file=None).tailor_deadline_seconds == 240
+    assert str(TailorDeadlineError(240.0)) == (
+        "Tailoring took longer than 240 seconds and was stopped. Try again."
     )
 
 

@@ -11,10 +11,10 @@ export const API_BASE_URL = (process.env.NEXT_PUBLIC_API_URL ?? "http://localhos
 export const MAX_LATEX_CHARS = 200_000;
 export const MAX_JD_CHARS = 50_000;
 
-// The backend stops a run after TAILOR_DEADLINE_SECONDS (90 s) and answers
+// The backend stops a run after TAILOR_DEADLINE_SECONDS (240 s) and answers
 // with a structured gemini_deadline error. The client waits slightly longer so
 // that error normally arrives; this only fires if the backend hangs.
-const REQUEST_TIMEOUT_MS = 100 * 1000;
+const REQUEST_TIMEOUT_MS = 250 * 1000;
 
 // ---- Response types (mirror backend pydantic models) -----------------------
 

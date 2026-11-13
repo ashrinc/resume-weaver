@@ -8,6 +8,7 @@ from app.api.errors import register_error_handlers
 from app.api.routes import tailor
 from app.archive import routes as archive
 from app.archive.service import ArchiveService
+from app.archive.storage import build_storage
 from app.config import get_settings
 from app.llm.client import GeminiClient
 from app.tailor.pipeline import TailorPipeline
@@ -23,9 +24,7 @@ def create_app(
     archive service pointed at temporary directories, and a short
     ``tailor_deadline_seconds`` (default: TAILOR_DEADLINE_SECONDS)."""
     settings = get_settings()
-    archive_svc = archive_service or ArchiveService(
-        settings.archive_upload_dir, settings.archive_database_url
-    )
+    archive_svc = archive_service or ArchiveService(build_storage(settings), settings.database_url)
 
     @asynccontextmanager
     async def lifespan(_: FastAPI) -> AsyncIterator[None]:
