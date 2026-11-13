@@ -10,6 +10,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, Request
 
 from app.api.errors import InternalPipelineError, TailorDeadlineError
+from app.api.ratelimit import client_key
 from app.api.schemas import ErrorResponse
 from app.llm.errors import GeminiError
 from app.tailor.models import TailorRequest, TailorResult
@@ -33,6 +34,8 @@ def get_pipeline(request: Request) -> TailorPipeline:
         500: {"model": ErrorResponse, "description": "Unexpected or configuration error"},
         502: {"model": ErrorResponse, "description": "Gemini timeout, rate limit or bad response"},
         504: {"model": ErrorResponse, "description": "Overall deadline exceeded (gemini_deadline)"},
+        401: {"model": ErrorResponse, "description": "Sign in required (ACCESS_PASSWORD set)"},
+        429: {"model": ErrorResponse, "description": "Too many tailoring requests"},
     },
 )
 async def tailor(
@@ -41,6 +44,7 @@ async def tailor(
     pipeline: Annotated[TailorPipeline, Depends(get_pipeline)],
 ) -> TailorResult:
     deadline: float = request.app.state.tailor_deadline_seconds
+    request.app.state.tailor_limiter.hit(client_key(request))
     try:
         # One overall limit (TAILOR_DEADLINE_SECONDS), including LLM retries and
         # backoff. On expiry the run is cancelled, so nothing is cached.

@@ -9,6 +9,8 @@
 | GeminiResponseError        | 502  | gemini_bad_response    | per error        |
 | GeminiConfigError          | 500  | gemini_not_configured  | no               |
 | TailorDeadlineError        | 504  | gemini_deadline        | yes              |
+| UnauthorizedError          | 401  | unauthorized           | no               |
+| RateLimitedError           | 429  | rate_limited           | yes              |
 | InternalPipelineError      | 500  | internal_error         | yes              |
 | ArchiveValidationError     | 422  | invalid_upload         | no               |
 | ArchiveNotFoundError       | 404  | not_found              | no               |
@@ -23,6 +25,8 @@ from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
+from app.api.auth import UnauthorizedError
+from app.api.ratelimit import RateLimitedError
 from app.api.schemas import ErrorBody, ErrorDetail, ErrorResponse
 from app.archive.service import ArchiveNotFoundError, ArchiveValidationError
 from app.llm.errors import (
@@ -101,6 +105,26 @@ def register_error_handlers(app: FastAPI) -> None:
                 retry_after_seconds=getattr(exc, "retry_after", None),
             ),
         )
+
+    @app.exception_handler(UnauthorizedError)
+    async def _unauthorized(_: Request, exc: UnauthorizedError) -> JSONResponse:
+        response = error_response(401, ErrorBody(code="unauthorized", message=str(exc)))
+        response.headers["WWW-Authenticate"] = "Bearer"
+        return response
+
+    @app.exception_handler(RateLimitedError)
+    async def _rate_limited(_: Request, exc: RateLimitedError) -> JSONResponse:
+        response = error_response(
+            429,
+            ErrorBody(
+                code="rate_limited",
+                message=str(exc),
+                retryable=True,
+                retry_after_seconds=round(exc.retry_after, 1),
+            ),
+        )
+        response.headers["Retry-After"] = str(max(1, round(exc.retry_after)))
+        return response
 
     @app.exception_handler(TailorDeadlineError)
     async def _deadline(_: Request, exc: TailorDeadlineError) -> JSONResponse:

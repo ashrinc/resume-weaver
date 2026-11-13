@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
+import { AuthGate } from "@/components/AuthGate";
 import { DisclosureBanner } from "@/components/DisclosureBanner";
 import { NavBar } from "@/components/NavBar";
 import { Starfield } from "@/components/Starfield";
@@ -21,7 +22,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Starfield />
         <NavBar />
         <DisclosureBanner />
-        <main className="main">{children}</main>
+        <main className="main">
+          <AuthGate>{children}</AuthGate>
+        </main>
       </body>
     </html>
   );

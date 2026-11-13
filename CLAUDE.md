@@ -167,11 +167,26 @@ Frontend (`frontend/`, Next.js 16 + React 19 + TypeScript; run these from `front
 
 ## What it is
 
-A local, single-user web app with two **independent** features. Do not couple them.
+A single-user web app with two **independent** features. Do not couple them. It runs locally, or publicly deployed behind one password (see Deployment).
 1. **Resume tailoring**: takes LaTeX resume source and a plain-text JD, then returns tailored LaTeX, a syntax-validation report, and two ATS alignment scores. Generation is one-shot: no iterative refinement, no PDF compilation.
 2. **PDF archive**: upload, list, download and delete PDFs tagged with a company name (required) and a role (optional).
 
-No auth, no accounts, no cloud storage.
+No accounts. Locally there is no auth and storage is local. In production a single `ACCESS_PASSWORD` gates everything, and the archive uses Supabase.
+
+## Deployment (public)
+
+- **Hosting:** backend on **Render** (`render.yaml` Blueprint, `rootDir: backend`, `uv sync --frozen --no-dev`, uvicorn with `--proxy-headers`, health check `/api/health`). Frontend on **Vercel** (root directory `frontend`, `NEXT_PUBLIC_API_URL` set to the Render URL; it is baked in at build time, so redeploy after changing it). The browser calls Render directly, so Vercel's function limits never apply.
+- **Access control:** `app/api/auth.py`.
+  - `POST /api/auth/login {password}` returns a stateless token `<expiry>.<HMAC-SHA256>`, keyed from the password, valid 30 days. Changing the password logs everyone out.
+  - `GET /api/auth/session` returns `{auth_required, authenticated}`.
+  - The tailor and archive routers carry `Depends(require_auth)`; `/api/health` and `/api/auth/*` are open. 401 `unauthorized` comes with `WWW-Authenticate: Bearer`.
+  - An empty `ACCESS_PASSWORD` turns auth off (local only). `APP_ENV=production` refuses to start without a password of 12+ characters, and hides `/docs` and `/openapi.json`.
+- **Rate limits:** `app/api/ratelimit.py`, in-memory sliding windows per client IP: `LOGIN_ATTEMPTS_PER_15_MINUTES` (10) and `TAILOR_RATE_LIMIT_PER_HOUR` (30; 0 disables). Over the limit returns 429 `rate_limited` with `Retry-After`.
+- **CORS:** `CORS_ORIGINS` is comma-separated or a JSON list (`NoDecode` plus a validator); trailing slashes are stripped. 401/429 responses carry CORS headers, and preflights need no auth.
+- **Frontend:** `src/lib/auth.ts` (token in localStorage under `resume-tailr.auth-token`, `authHeaders()` added to every API call; `toApiError` clears the token on 401). `AuthGate` in the root layout shows a sign-in screen when the session says so, and re-checks whenever the token changes.
+- **Tests:** `tests/test_auth.py`, using `create_app(settings=Settings(...))` to inject config.
+- `httpx` is a runtime dependency (Supabase storage and the Gemini client), not dev-only.
+- **Production `DATABASE_URL`:** use Supabase's **Session pooler** string. The direct `db.<ref>.supabase.co` host is IPv6-only, and Render is IPv4.
 
 ## Planned stack
 

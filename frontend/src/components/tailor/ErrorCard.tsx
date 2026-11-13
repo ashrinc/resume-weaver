@@ -5,6 +5,8 @@ import styles from "./tailor.module.css";
 const TITLES: Record<string, string> = {
   gemini_timeout: "The model timed out",
   gemini_deadline: "Tailoring took too long",
+  rate_limited: "Too many requests",
+  unauthorized: "Signed out",
   gemini_rate_limited: "Model rate limit reached",
   gemini_bad_response: "The model returned an unusable response",
   gemini_not_configured: "LLM API key missing",

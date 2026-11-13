@@ -1238,6 +1238,7 @@ dependencies = [
     { name = "aiosqlite" },
     { name = "fastapi" },
     { name = "google-genai" },
+    { name = "httpx" },
     { name = "psycopg", extra = ["binary"] },
     { name = "pydantic-settings" },
     { name = "python-multipart" },
@@ -1249,7 +1250,6 @@ dependencies = [
 
 [package.dev-dependencies]
 dev = [
-    { name = "httpx" },
     { name = "pytest" },
     { name = "ruff" },
 ]
@@ -1259,6 +1259,7 @@ requires-dist = [
     { name = "aiosqlite", specifier = ">=0.22.1" },
     { name = "fastapi", specifier = ">=0.162.5" },
     { name = "google-genai", specifier = ">=3.2.0" },
+    { name = "httpx", specifier = ">=0.28.1" },
     { name = "psycopg", extras = ["binary"], specifier = ">=3.3.9" },
     { name = "pydantic-settings", specifier = ">=2.16.2" },
     { name = "python-multipart", specifier = ">=0.0.33" },
@@ -1270,7 +1271,6 @@ requires-dist = [
 
 [package.metadata.requires-dev]
 dev = [
-    { name = "httpx", specifier = ">=0.28.1" },
     { name = "pytest", specifier = ">=9.2.0" },
     { name = "ruff", specifier = ">=0.17.4" },
 ]

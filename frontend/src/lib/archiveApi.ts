@@ -2,6 +2,7 @@
 // Independent of tailoring; it shares only the base URL and error handling.
 
 import { API_BASE_URL, ApiError, toApiError } from "./api";
+import { authHeaders } from "./auth";
 
 // Mirrors backend MAX_UPLOAD_BYTES (app/archive/service.py).
 export const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
@@ -21,7 +22,11 @@ const ARCHIVE_URL = `${API_BASE_URL}/api/archive`;
 async function request(input: string, init?: RequestInit): Promise<Response> {
   let response: Response;
   try {
-    response = await fetch(input, init);
+    // Never set Content-Type here: FormData uploads need the browser's boundary.
+    response = await fetch(input, {
+      ...init,
+      headers: { ...(init?.headers as Record<string, string> | undefined), ...authHeaders() },
+    });
   } catch {
     if (init?.signal?.aborted) throw new ApiError("Request cancelled.", "cancelled", true);
     throw new ApiError(

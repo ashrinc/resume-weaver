@@ -1,6 +1,8 @@
 // Client for the FastAPI backend. All Gemini calls happen server-side; the
 // browser only ever talks to our own backend.
 
+import { authHeaders, setToken } from "./auth";
+
 // Inlined at build time by Next.js (NEXT_PUBLIC_ prefix): rebuild after changing it.
 export const API_BASE_URL = (process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000").replace(
   /\/+$/,
@@ -205,6 +207,8 @@ interface ErrorBody {
 }
 
 export async function toApiError(response: Response): Promise<ApiError> {
+  // Expired or invalid sign-in: drop the token so the sign-in screen appears.
+  if (response.status === 401) setToken(null);
   let body: ErrorBody = {};
   try {
     body = (await response.json()) as ErrorBody;
@@ -235,7 +239,7 @@ export async function tailorResume(
   try {
     response = await fetch(`${API_BASE_URL}/api/tailor`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", ...authHeaders() },
       body: JSON.stringify({ latex_source: latexSource, job_description: jobDescription }),
       signal: combined,
     });

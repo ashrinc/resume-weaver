@@ -16,7 +16,7 @@ function notify(): void {
   listeners.forEach((listener) => listener());
 }
 
-function read(key: string): string | null {
+export function readStored(key: string): string | null {
   if (memory.has(key)) return memory.get(key) ?? null;
   try {
     const value = window.localStorage.getItem(key);
@@ -27,7 +27,7 @@ function read(key: string): string | null {
   }
 }
 
-function write(key: string, value: string | null): void {
+export function writeStored(key: string, value: string | null): void {
   if (value === null) memory.delete(key);
   else memory.set(key, value);
   try {
@@ -65,9 +65,9 @@ export function useLocalStorage(
 ): [string, (value: string | null) => void] {
   const value = useSyncExternalStore(
     subscribe,
-    () => read(key) ?? fallback,
+    () => readStored(key) ?? fallback,
     () => serverValue,
   );
-  const setValue = useCallback((next: string | null) => write(key, next), [key]);
+  const setValue = useCallback((next: string | null) => writeStored(key, next), [key]);
   return [value, setValue];
 }

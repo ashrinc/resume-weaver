@@ -1,0 +1,42 @@
+# Render Blueprint for the FastAPI backend (the Next.js frontend is on Vercel).
+# Render dashboard -> New -> Blueprint -> pick this repo. Values marked
+# `sync: false` are prompted for in the dashboard; never commit them.
+services:
+  - type: web
+    name: resume-tailr-api
+    runtime: python
+    plan: free # free instances sleep when idle (first request ~30-60 s); "starter" stays warm
+    rootDir: backend
+    buildCommand: pip install uv && uv sync --frozen --no-dev
+    # --proxy-headers: rate limits see the real client IP behind Render's proxy.
+    startCommand: uv run --no-sync uvicorn app.main:app --host 0.0.0.0 --port $PORT --proxy-headers --forwarded-allow-ips "*"
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.13
+      - key: APP_ENV
+        value: production
+      - key: GEMINI_MODEL
+        value: gemini-3.5-flash
+      - key: ENABLE_VERIFY_CALL
+        value: "false"
+      - key: TAILOR_DEADLINE_SECONDS
+        value: "240"
+      - key: STORAGE_BACKEND
+        value: supabase
+      - key: SUPABASE_BUCKET
+        value: resumes
+      # Secrets and deployment-specific values: entered in the Render dashboard.
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: ACCESS_PASSWORD
+        sync: false
+      - key: DATABASE_URL
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_KEY
+        sync: false
+      - key: CORS_ORIGINS
+        sync: false
